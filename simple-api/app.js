@@ -2,25 +2,32 @@ const express = require('express');
 const app = express();
 
 const data = require('./data.json');
+//imports routes.js 
+const routes = require('./routes/routes');
+
+
+// //express middleware tells requests to come in as json. .json() is a method, so don't forget the ()
+app.use(express.json());
+//this piece of middlewhere connect our router routes and places /api in front of the route
+app.use('/api', routes);
 
 
 
-
-//we don't render or send. We want a json object, hence res.json to send a json object to the client.
-app.get('/greetings', (req, res) => {
-    res.json({greeting: "Hello Rest API"})
+//Error Handling
+app.use((req, res, next) =>{
+  const err = new Error("Not Found");
+  next(err);
 });
 
-
-// Send a GET req to read a list of quotes
-app.get('/quotes/:id', (req,res) => {
-  //id = req.params.id 
-
-  const quote = data.records.find(
-    record => data.records[0].id == parseInt(req.params.id)
-    );
-  res.json(quote);
-})
+app.use((err, req, res, next) => {
+  res.status(err.status || 500);
+  res.json({
+    error: {
+      message: err.message
+    }
+  })
+  next(err);
+});
 
 
 //  Send a GET req to READ a quote by array index
@@ -36,10 +43,7 @@ app.get('/quotes/:id', (req,res) => {
 // Send a DELETE to  /quotes/:id/
 
 // Send a get req to view a random quote
-app.get('/quotes/quote/random', (req,res) => {
-    const r  = Math.floor(Math.random() * data.records.length) ;
-    res.json({data: data.records[r].quote});
-  })
+
 //Error Handling
 
 
