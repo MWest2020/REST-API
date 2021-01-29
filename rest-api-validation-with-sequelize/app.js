@@ -3,7 +3,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const routes = require('./routes');
-const sequelize = require('./models').sequelize; // import Sequelize
+const { sequelize } = require('./models'); // import Sequelize
 
 // Create the Express app.
 const app = express();
