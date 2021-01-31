@@ -2,17 +2,22 @@
 
 // Middleware to authenticate the request using Basic Authentication.
 const auth = require('basic-auth');
+//importing library to user compareSync() from bcrypt
 const bcrypt = require('bcrypt');
-
+//importing the User model module 
 const { User } = require('../models')
 
 
 
-
+//exports authenticateUser aysnc function
 exports.authenticateUser = async (req, res, next) => {
-    // Parse the user's credentials from the Authorization header.
-  const credentials = auth(req);
+    //store error messages form else clauses
+    let message; 
 
+    // Parse the user's credentials from the Authorization header.
+    const credentials = auth(req);
+    
+   
     // If the user's credentials are available...
     if(credentials){
         // Attempt to retrieve the user from the data store
@@ -26,32 +31,43 @@ exports.authenticateUser = async (req, res, next) => {
             , user.confirmedPassword)//stored in the user model
             if(authenticated){
                 //if passwords match
-            }
-       }
-    }
+                console.log('Authentication successful');
 
+                //store the user on the Request object
+                req.currentUser = user;
+            } else {
+                message = `Authentication failure for username: ${user.username}`
+            }
+       } else {
+           message = `User not found for ${credentials.name}`
+       }
+
+    } else {message = 'Auth header not found';
+    }
     
-       // by their username (i.e. the user's "key"
-       // from the Authorization header).
-  
-    // If a user was successfully retrieved from the data store...
-       // Use the bcrypt npm package to compare the user's password
-       // (from the Authorization header) to the user's password
-       // that was retrieved from the data store.
-  
-    // If the passwords match...
-       // Store the retrieved user object on the request object
-       // so any middleware functions that follow this middleware function
-       // will have access to the user's information.
+    
   
     // If user authentication failed...
        // Return a response with a 401 Unauthorized HTTP status code.
-  
-    // Or if user authentication succeeded...
-    if(this.authenticateUser.authenticateUser){
-        // Call the next() method.
+    
+    
+    //if message variable has a message stored
+    if(message){
+        console.warn(message);
+        res.status(401).json({
+            message: 'Access Denied'
+        })//intentionally vague and not returning specifics about password or username, etc
+    } else{
         next();
     }
+
+
+
+    // // Or if user authentication succeeded...
+    // if(this.authenticateUser.authenticateUser){
+    //     // Call the next() method.
+    //     next();
+    // }
        
   };
 

@@ -3,12 +3,23 @@
 const express = require('express');
 const { asyncHandler } = require('./middleware/async-handler');
 const { User } = require('./models');
+//for protected routes, importing the auth-user middleware
+const { authenticateUser }  = require('./middleware/auth-user');
+
 
 // Construct a router instance.
 const router = express.Router();
 
-// Route that returns a list of users.
+// Route that returns a list of users. IF AND ONLY IF request is succesfully authenticated
+router.get('/users', authenticateUser,  asyncHandler(async(req, res) => {
+  const user = req.currentUser;
 
+  res.json({
+    name: user.name,
+    username: user.username
+  })
+
+}));
 
 // Route that creates a new user.
 router.post('/users', asyncHandler(async (req, res) => {
